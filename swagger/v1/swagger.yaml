@@ -1,0 +1,917 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+  description: API supports both Bearer token authentication (via Authorization header)
+    and cookie-based authentication (via HTTP cookies) for web applications.
+paths:
+  "/api/v1/login":
+    post:
+      summary: Login to get JWT token
+      tags:
+      - Authentication
+      security: []
+      parameters: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    token: jwt.token.here
+                    refresh_token: refresh.token.here
+                    user:
+                      id: uuid
+                      email: user@example.com
+                    message: Successfully logged in
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Invalid credentials
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+              required:
+              - email
+              - password
+  "/api/v1/refresh":
+    post:
+      summary: Refresh JWT token
+      tags:
+      - Authentication
+      security: []
+      parameters: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    token: jwt.token.here
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Invalid or expired refresh token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+              required:
+              - refresh_token
+  "/api/v1/logout":
+    delete:
+      summary: Logout and invalidate JWT token
+      tags:
+      - Authentication
+      security:
+      - bearer_auth: []
+      - cookie_auth: []
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    message: Successfully logged out
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Invalid credentials
+  "/api/v1/confirm_phone":
+    post:
+      summary: Confirm phone number
+      tags:
+      - Registrations
+      parameters: []
+      responses:
+        '200':
+          description: phone confirmed
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    message: Phone number confirmed successfully.
+        '422':
+          description: invalid or expired code
+          content:
+            application/json:
+              examples:
+                invalid:
+                  value:
+                    error: Invalid or expired confirmation code.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                code:
+                  type: string
+              required:
+              - phone
+              - code
+  "/api/v1/send_phone_confirmation":
+    post:
+      summary: Send phone confirmation code
+      tags:
+      - Registrations
+      parameters: []
+      responses:
+        '200':
+          description: confirmation code sent for user not found or no phone
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    message: If your account has a phone number, a confirmation code
+                      has been sent.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required:
+              - email
+  "/api/v1/send_email_confirmation":
+    post:
+      summary: Send email confirmation
+      tags:
+      - Registrations
+      parameters: []
+      responses:
+        '200':
+          description: confirmation email sent for user not found or already confirmed
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    message: If your account exists and is not confirmed, a confirmation
+                      email has been sent.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required:
+              - email
+  "/api/v1/password/reset":
+    post:
+      summary: Request password reset
+      tags:
+      - Authentication
+      security: []
+      description: Sends password reset instructions to the user's email address.
+        For security, always returns success even if email doesn't exist.
+      parameters: []
+      responses:
+        '200':
+          description: success with non-existent email
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    message: Password reset instructions sent (if user with that email
+                      exists).
+                security_response:
+                  value:
+                    message: Password reset instructions sent (if user with that email
+                      exists).
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message (same response for security)
+                required:
+                - message
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Email address to send password reset instructions to
+                  example: user@example.com
+              required:
+              - email
+  "/api/v1/password/reset/{token}":
+    put:
+      summary: Reset password with token
+      tags:
+      - Authentication
+      security: []
+      description: Resets user password using a valid reset token. Token is obtained
+        from password reset email.
+      parameters:
+      - name: token
+        in: path
+        description: Password reset token from email
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    message: Password has been reset.
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Success message confirming password was reset
+                required:
+                - message
+        '401':
+          description: expired token
+          content:
+            application/json:
+              examples:
+                invalid_token:
+                  value:
+                    error: Invalid token
+                used_token:
+                  value:
+                    error: Token has already been used
+                expired_token:
+                  value:
+                    error: Token has expired
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message for expired token
+                required:
+                - error
+        '422':
+          description: invalid password
+          content:
+            application/json:
+              examples:
+                blank_password:
+                  value:
+                    error: Password is required
+                validation_error:
+                  value:
+                    error: Password is too short (minimum is 6 characters)
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Validation error message
+                required:
+                - error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  format: password
+                  description: New password (minimum 6 characters)
+                  example: newpassword123
+              required:
+              - password
+  "/api/v1/register":
+    post:
+      summary: Creates a new user
+      tags:
+      - Registrations
+      security: []
+      parameters: []
+      responses:
+        '201':
+          description: user created with phone
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    status:
+                      code: 200
+                      message: Signed up successfully. Please check your email to
+                        confirm your account.
+                    data:
+                      email: test@example.com
+                      name: Test User
+        '422':
+          description: invalid request
+          content:
+            application/json:
+              examples:
+                invalid:
+                  value:
+                    status:
+                      message: User couldn't be created successfully. Email is invalid,
+                        Password is too short (minimum is 6 characters), Name can't
+                        be blank
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                    password:
+                      type: string
+                      format: password
+                    name:
+                      type: string
+                    phone:
+                      type: string
+                  required:
+                  - email
+                  - password
+                  - name
+  "/api/v1/confirm_email":
+    post:
+      summary: Confirm user email
+      tags:
+      - Registrations
+      security: []
+      parameters: []
+      responses:
+        '200':
+          description: email confirmed
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    message: Email confirmed successfully. You can now log in.
+        '422':
+          description: invalid or expired token
+          content:
+            application/json:
+              examples:
+                invalid:
+                  value:
+                    error: Invalid or expired confirmation token.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+              required:
+              - token
+  "/api/v1/users":
+    get:
+      summary: List all users
+      tags:
+      - Users
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: users listed
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    data:
+                    - id: 550e8400-e29b-41d4-a716-446655440000
+                      type: user
+                      attributes:
+                        name: John Doe
+                        email: john@example.com
+                        phone: "+1234567890"
+                        email_confirmed: true
+                        phone_confirmed: true
+                        profile:
+                          bio: Software developer
+                          location: San Francisco
+                        roles:
+                        - user
+                        created_at: '2024-01-01T00:00:00.000Z'
+                        updated_at: '2024-01-01T00:00:00.000Z'
+                    - id: 550e8400-e29b-41d4-a716-446655440001
+                      type: user
+                      attributes:
+                        name: Jane Smith
+                        email: jane@example.com
+                        phone: "+1987654321"
+                        email_confirmed: true
+                        phone_confirmed: false
+                        profile: {}
+                        roles:
+                        - user
+                        - facilitator
+                        created_at: '2024-01-02T00:00:00.000Z'
+                        updated_at: '2024-01-02T00:00:00.000Z'
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        type:
+                          type: string
+                        attributes:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            email:
+                              type: string
+                            phone:
+                              type: string
+                              nullable: true
+                            email_confirmed:
+                              type: boolean
+                            phone_confirmed:
+                              type: boolean
+                            profile:
+                              type: object
+                            roles:
+                              type: array
+                              items:
+                                type: string
+                              description: Array of role names assigned to the user
+                            created_at:
+                              type: string
+                              format: date-time
+                            updated_at:
+                              type: string
+                              format: date-time
+        '401':
+          description: unauthorized
+  "/api/v1/users/me":
+    get:
+      summary: Get current user information
+      tags:
+      - Users
+      security:
+      - bearer_auth: []
+      responses:
+        '200':
+          description: current user found
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    data:
+                      id: uuid
+                      type: user
+                      attributes:
+                        name: Current User
+                        email: current@example.com
+                        phone: "+1234567890"
+                        organization_id: 550e8400-e29b-41d4-a716-446655440000
+                        email_confirmed: true
+                        phone_confirmed: false
+                        is_profile_complete: false
+                        require_password_change: false
+                        profile: {}
+                        roles:
+                        - user
+                        - facilitator
+                        created_at: '2024-01-01T00:00:00.000Z'
+                        updated_at: '2024-01-01T00:00:00.000Z'
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      type:
+                        type: string
+                      attributes:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          email:
+                            type: string
+                          phone:
+                            type: string
+                            nullable: true
+                          email_confirmed:
+                            type: boolean
+                          phone_confirmed:
+                            type: boolean
+                          profile:
+                            type: object
+                          roles:
+                            type: array
+                            items:
+                              type: string
+                            description: Array of role names assigned to the user
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+        '401':
+          description: expired token
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: No token provided
+                expired:
+                  value:
+                    error: Token has expired
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  "/api/v1/users/{id}":
+    get:
+      summary: Get a user
+      tags:
+      - Users
+      security:
+      - bearer_auth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: user found
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    data:
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      type: user
+                      attributes:
+                        name: Test User
+                        email: test@example.com
+                        phone: "+1234567890"
+                        email_confirmed: true
+                        phone_confirmed: true
+                        profile:
+                          bio: Test user bio
+                          location: Test City
+                        roles:
+                        - user
+                        created_at: '2024-01-01T00:00:00.000Z'
+                        updated_at: '2024-01-01T00:00:00.000Z'
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      type:
+                        type: string
+                      attributes:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          email:
+                            type: string
+                          phone:
+                            type: string
+                            nullable: true
+                          email_confirmed:
+                            type: boolean
+                          phone_confirmed:
+                            type: boolean
+                          profile:
+                            type: object
+                          roles:
+                            type: array
+                            items:
+                              type: string
+                            description: Array of role names assigned to the user
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+        '401':
+          description: unauthorized
+        '404':
+          description: user not found
+    patch:
+      summary: Update a user
+      tags:
+      - Users
+      security:
+      - bearer_auth: []
+      description: Updates user profile information including name, phone, organization,
+        and custom profile data. Phone number changes automatically trigger SMS verification.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: User ID
+        schema:
+          type: string
+      responses:
+        '200':
+          description: user profile updated with comprehensive data
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    data:
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      type: user
+                      attributes:
+                        name: John Doe
+                        email: john.doe@example.com
+                        phone: "+15559876543"
+                        organization_id: 550e8400-e29b-41d4-a716-446655440000
+                        email_confirmed: true
+                        phone_confirmed: false
+                        is_profile_complete: true
+                        require_password_change: false
+                        profile:
+                          bio: Software developer with 5 years experience
+                          department: Engineering
+                          job_title: Senior Software Developer
+                          skills:
+                          - JavaScript
+                          - Ruby
+                          - React
+                          location: San Francisco, CA
+                          hire_date: '2020-01-15'
+                        roles:
+                        - user
+                        created_at: '2024-01-01T00:00:00.000Z'
+                        updated_at: '2024-01-01T00:00:00.000Z'
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      type:
+                        type: string
+                      attributes:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          email:
+                            type: string
+                          phone:
+                            type: string
+                            nullable: true
+                          email_confirmed:
+                            type: boolean
+                          phone_confirmed:
+                            type: boolean
+                          profile:
+                            type: object
+                          roles:
+                            type: array
+                            items:
+                              type: string
+                            description: Array of role names assigned to the user
+                          created_at:
+                            type: string
+                            format: date-time
+                          updated_at:
+                            type: string
+                            format: date-time
+        '401':
+          description: unauthorized
+        '422':
+          description: unprocessable entity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: Full name of the user
+                      example: John Doe
+                    phone:
+                      type: string
+                      description: Phone number in international format. Changing
+                        this will reset phone confirmation and send verification SMS.
+                      example: "+15551234567"
+                    profile:
+                      type: object
+                      description: Custom profile data stored as JSON. Can contain
+                        any user-defined fields.
+                      properties:
+                        bio:
+                          type: string
+                          description: User biography
+                          example: Software developer with 5 years experience
+                        department:
+                          type: string
+                          description: Department name
+                          example: Engineering
+                        job_title:
+                          type: string
+                          description: Job title
+                          example: Senior Software Developer
+                        skills:
+                          type: array
+                          items:
+                            type: string
+                          description: List of skills
+                          example:
+                          - JavaScript
+                          - Ruby
+                          - React
+                        location:
+                          type: string
+                          description: Work location
+                          example: San Francisco, CA
+                        hire_date:
+                          type: string
+                          format: date
+                          description: Date of hire
+                          example: '2020-01-15'
+                      example:
+                        bio: Software developer with 5 years experience
+                        department: Engineering
+                        job_title: Senior Software Developer
+                        skills:
+                        - JavaScript
+                        - Ruby
+                        - React
+                        location: San Francisco, CA
+                        hire_date: '2020-01-15'
+    delete:
+      summary: Deletes a user
+      tags:
+      - Users
+      parameters:
+      - name: id
+        in: path
+        description: User ID (UUID)
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: user deleted
+        '403':
+          description: forbidden
+        '404':
+          description: user not found
+  "/api/v1/users/{id}/password":
+    patch:
+      summary: Update a user password
+      tags:
+      - Users
+      security:
+      - bearer_auth: []
+      description: Updates user password. Requires current password verification for
+        security. Password must be at least 6 characters long.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: User ID
+        schema:
+          type: string
+      responses:
+        '200':
+          description: password updated
+        '422':
+          description: validation error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    current_password:
+                      type: string
+                      description: Current password for verification
+                      example: currentpassword123
+                    password:
+                      type: string
+                      description: New password (minimum 6 characters)
+                      example: newpassword123
+                    password_confirmation:
+                      type: string
+                      description: Confirmation of new password (must match password)
+                      example: newpassword123
+                  required:
+                  - current_password
+                  - password
+                  - password_confirmation
+security:
+- bearer_auth: []
+- cookie_auth: []
+components:
+  securitySchemes:
+    bearer_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token in Authorization header (Bearer token) - suitable for
+        mobile apps and explicit token passing
+    cookie_auth:
+      type: apiKey
+      in: cookie
+      name: jwt_token
+      description: JWT token stored in HTTP cookie - suitable for web applications
+servers:
+- url: https://api.example.com/
+  description: Production
+- url: "{protocol}://{defaultHost}"
+  variables:
+    protocol:
+      default: http
+    defaultHost:
+      default: localhost:3000

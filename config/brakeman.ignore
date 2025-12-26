@@ -1,0 +1,51 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 0,
+      "fingerprint": "102eb69951c8fe192c1402e69d8469640a6683b143a8311d7754b4413109e521",
+      "check_name": "SQL",
+      "message": "Possible SQL injection",
+      "file": "app/jobs/base_notification_job.rb",
+      "line": 47,
+      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
+      "code": "User.where(\"(profile->'preferences'->'notifications'->>'#{notification_preference_key}' IS NULL OR profile->'preferences'->'notifications'->>'#{notification_preference_key}' != 'false') AND (profile->'preferences'->'notifications'->>'enabled' IS NULL OR profile->'preferences'->'notifications'->>'enabled' != 'false')\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "BaseNotificationJob",
+        "method": "find_users_needing_notification"
+      },
+      "user_input": "notification_preference_key",
+      "confidence": "Medium",
+      "cwe_id": [
+        89
+      ],
+      "note": "False positive: JSONB key must be in SQL string; notification_preference_key is validated to only contain [a-z0-9_-]."
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "d90ccf0aea200a2088c2e06ddf36c649f5d4512a25a01bcb320549a23b1511b2",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "script/transcribe_competencies.rb",
+      "line": 223,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "system(\"transcribe --formats txt --lang en \\\"#{video_path}\\\"\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "CompetencyTranscriber",
+        "method": "transcribe_video"
+      },
+      "user_input": "video_path",
+      "confidence": "Medium",
+      "cwe_id": [
+        77
+      ],
+      "note": "This is a manually run script and the paths and the video paths are generated from a file I control"
+    }
+  ],
+  "brakeman_version": "7.1.0"
+}

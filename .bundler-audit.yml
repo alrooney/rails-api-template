@@ -1,0 +1,3 @@
+# Ignoring this CVE for thor until upstream is fixed.  Thor has a fix but seems it is not available due to bundler dependencies.
+ignore:
+  - CVE-2025-54314
