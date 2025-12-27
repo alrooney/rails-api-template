@@ -1,24 +1,5 @@
 development:
-  send_morning_notifications:
-    class: SendMorningNotificationsJob
-    queue: default
-    schedule: every hour
-  send_midday_notifications:
-    class: SendMiddayNotificationsJob
-    queue: default
-    schedule: every hour
-  send_afternoon_notifications:
-    class: SendAfternoonNotificationsJob
-    queue: default
-    schedule: every hour
-  send_evening_notifications:
-    class: SendEveningNotificationsJob
-    queue: default
-    schedule: every hour
-  send_wind_down_notifications:
-    class: SendWindDownNotificationsJob
-    queue: default
-    schedule: every hour
+  # Add recurring jobs here that you want to run in development
 
 production:
   # periodic_cleanup:
@@ -30,23 +11,4 @@ production:
   #   command: "SoftDeletedRecord.due.delete_all"
   #   priority: 2
   #   schedule: at 5am every day
-  send_morning_notifications:
-    class: SendMorningNotificationsJob
-    queue: default
-    schedule: every hour
-  send_midday_notifications:
-    class: SendMiddayNotificationsJob
-    queue: default
-    schedule: every hour
-  send_afternoon_notifications:
-    class: SendAfternoonNotificationsJob
-    queue: default
-    schedule: every hour
-  send_evening_notifications:
-    class: SendEveningNotificationsJob
-    queue: default
-    schedule: every hour
-  send_wind_down_notifications:
-    class: SendWindDownNotificationsJob
-    queue: default
-    schedule: every hour
+  

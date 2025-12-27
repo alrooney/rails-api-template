@@ -85,6 +85,9 @@ jwt_secret: your-secret-key-here
 rails db:create
 rails db:migrate
 rails db:seed
+
+# Setup the queue database (for background jobs)
+rails db:schema:load:queue
 ```
 
 ### 7. Start the development server
@@ -230,7 +233,14 @@ Rails 8 uses [Solid Queue](https://github.com/rails/solid_queue) as the default 
 1. **Configure the queue database**
    - In `config/database.yml`, ensure you have a `queue` section (already configured)
 
-2. **Run the queue migration**
+2. **Setup the queue database schema**
+   
+   For a new database, load the schema directly:
+   ```bash
+   bin/rails db:schema:load:queue
+   ```
+   
+   Or if you have migrations, run them:
    ```bash
    bin/rails db:migrate:queue
    ```
