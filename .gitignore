@@ -4,8 +4,9 @@
 # belong in git's global ignore instead:
 # `$XDG_CONFIG_HOME/git/ignore` or `~/.config/git/ignore`
 
-# Ignore bundler config.
-/.bundle
+# Ignore bundler config except the shared template settings.
+/.bundle/*
+!/.bundle/config
 
 # Ignore all local environment files.
 *.local

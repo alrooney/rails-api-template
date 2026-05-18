@@ -16,7 +16,7 @@ A production-ready Rails 8.1 API-only starter template with JWT authentication, 
 
 ## Prerequisites
 
-- Ruby 3.4+ (managed via `mise` recommended)
+- Ruby 3.4.9+ (managed via `mise` recommended)
 - PostgreSQL 14+
 - `mise` for Ruby version management (recommended)
 
@@ -26,8 +26,8 @@ A production-ready Rails 8.1 API-only starter template with JWT authentication, 
 
 ```bash
 # Using mise (recommended)
-mise install ruby@3.4.7
-mise use ruby@3.4.7
+mise install ruby@3.4.9
+mise use ruby@3.4.9
 gem install rails
 
 # Or using your preferred Ruby version manager
@@ -173,14 +173,14 @@ open coverage/index.html
 ### Code quality checks
 
 ```bash
-# Run Rubocop (code style)
-bundle exec rubocop
+# Run the full CI suite (rspec + rubocop + brakeman + bundle audit)
+bundle exec rake ci
 
-# Run Brakeman (security)
-bundle exec brakeman
-
-# Run bundle audit (vulnerability check)
-bundle exec bundle audit check
+# Or run individual checks:
+bundle exec rake ci:rspec
+bundle exec rake ci:rubocop
+bundle exec rake ci:brakeman
+bundle exec rake ci:audit
 ```
 
 ## Development Tools
