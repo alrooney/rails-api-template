@@ -93,6 +93,14 @@ RSpec.configure do |config|
   config.before(:each) do
     Rails.cache.clear
   end
+
+  if Bullet.enable?
+    config.before(:each) { Bullet.start_request }
+    config.after(:each) do
+      Bullet.perform_out_of_channel_notifications if Bullet.notification?
+      Bullet.end_request
+    end
+  end
 end
 
 # Configure shoulda-matchers
