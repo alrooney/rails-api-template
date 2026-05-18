@@ -12,11 +12,13 @@ A production-ready Rails 8.1 API-only starter template with JWT authentication, 
 - **Background Jobs**: Solid Queue for database-backed background jobs with Mission Control UI
 - **Versioning**: Paper Trail for model versioning and audit trails
 - **Code Quality**: RuboCop, Brakeman, and bundler-audit for security and code quality
+- **Performance**: `oj` for fast JSON serialization, `bullet` for N+1 query detection in development and test
+- **Observability**: `lograge` for structured JSON request logs in production
 - **Active Storage**: File upload support with avatar attachments
 
 ## Prerequisites
 
-- Ruby 3.4.9+ (managed via `mise` recommended)
+- Ruby 4.0+ (managed via `mise` recommended)
 - PostgreSQL 14+
 - `mise` for Ruby version management (recommended)
 
@@ -26,8 +28,8 @@ A production-ready Rails 8.1 API-only starter template with JWT authentication, 
 
 ```bash
 # Using mise (recommended)
-mise install ruby@3.4.9
-mise use ruby@3.4.9
+mise install ruby@4.0.4
+mise use ruby@4.0.4
 gem install rails
 
 # Or using your preferred Ruby version manager

@@ -44,17 +44,16 @@ RSpec.describe JwtTokenService, type: :service do
       expect(result[0]['user_id']).to eq(user.id)
     end
 
-    it 'returns error for expired token' do
+    it 'raises ExpiredToken for an expired token' do
       expired_token = described_class.generate_token(user, expires_in: -1.hour)
-      result = described_class.decode_token(expired_token)
 
-      expect(result).to eq({ error: 'Token has expired' })
+      expect { described_class.decode_token(expired_token) }
+        .to raise_error(JwtTokenService::ExpiredToken, 'Token has expired')
     end
 
-    it 'returns error for invalid token' do
-      result = described_class.decode_token('invalid.token.here')
-
-      expect(result).to eq({ error: 'Invalid token' })
+    it 'raises InvalidToken for a malformed token' do
+      expect { described_class.decode_token('invalid.token.here') }
+        .to raise_error(JwtTokenService::InvalidToken, 'Invalid token')
     end
   end
 end

@@ -21,7 +21,7 @@ Bundler.require(*Rails.groups)
 module RailsApiStarter
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 8.0
+    config.load_defaults 8.1
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
@@ -41,9 +41,10 @@ module RailsApiStarter
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
-    # Add cookies and session middleware for JWT token storage
+    # Cookies middleware re-enabled for the optional cookie-based JWT fallback
+    # in app/controllers/concerns/jwt_authentication.rb (web clients). Session
+    # middleware is intentionally NOT enabled — no server-side session state.
     config.middleware.use ActionDispatch::Cookies
-    config.middleware.use ActionDispatch::Session::CookieStore
 
     # Configure Mission Control Jobs to use a custom base controller
     config.mission_control.jobs.base_controller_class = "MissionControlController"

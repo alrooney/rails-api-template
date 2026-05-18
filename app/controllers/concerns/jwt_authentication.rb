@@ -28,17 +28,12 @@ module JwtAuthentication
         return
       end
 
-      result = JwtTokenService.decode_token(token)
-      if result.is_a?(Hash) && result[:error]
-        render json: { error: result[:error] }, status: :unauthorized
-        return
-      end
-
-      payload = result[0]
+      payload, _header = JwtTokenService.decode_token(token)
       @current_user = User.find(payload["user_id"])
+    rescue JwtTokenService::ExpiredToken, JwtTokenService::InvalidToken => e
+      render json: { error: e.message }, status: :unauthorized
     rescue ActiveRecord::RecordNotFound
       render json: { error: "User not found" }, status: :unauthorized
-      nil
     end
 
     def extract_token
