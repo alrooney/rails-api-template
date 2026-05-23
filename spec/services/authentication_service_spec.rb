@@ -6,8 +6,9 @@ RSpec.describe AuthenticationService, type: :service do
   let(:mobile_request) { double('request', cookies: {}, headers: { 'X-Client-Type' => 'mobile' }) }
 
   # ENV[] is stubbed with .with('COOKIE_DOMAIN') in several contexts below.
-  # Call original by default so unrelated ENV lookups (e.g. by Bullet) pass through.
-  before { allow(ENV).to receive(:[]).and_call_original }
+  # Default unstubbed lookups to nil (deterministic, host-env independent) so
+  # unrelated reads — e.g. Bullet's ENV["BULLET_DEBUG"] — still succeed.
+  before { allow(ENV).to receive(:[]).and_return(nil) }
 
   describe '.authenticate_user' do
     it 'generates tokens and returns authentication data' do
