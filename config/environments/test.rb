@@ -50,4 +50,13 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  config.after_initialize do
+    Bullet.enable = true
+    Bullet.bullet_logger = true
+    Bullet.raise = true
+    # Unused-eager-loading detection produces frequent false positives
+    # on Active Storage attachments. N+1 detection remains on and raises.
+    Bullet.unused_eager_loading_enable = false
+  end
 end

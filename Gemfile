@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.1.1"
+gem "rails", "~> 8.1.3"
 # Use postgresql as the database for Active Record
 gem "pg", ">= 1.1"
 # Use the Puma web server [https://github.com/puma/puma]
@@ -46,6 +46,12 @@ gem "rswag-ui"
 # Authentication
 gem "jwt"
 
+# Faster JSON serialization (drop-in replacement for stdlib JSON)
+gem "oj"
+
+# Structured single-line request logging for production aggregators
+gem "lograge"
+
 # SMS integration
 # Note: have to specify version due to incomapatability with jwt 3.x
 # see https://github.com/twilio/twilio-ruby/issues/754
@@ -83,4 +89,7 @@ group :development, :test do
   gem "factory_bot_rails"
   gem "simplecov"
   gem "shoulda-matchers"
+
+  # Detects N+1 queries in dev (logs) and test (raises)
+  gem "bullet"
 end

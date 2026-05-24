@@ -12,11 +12,13 @@ A production-ready Rails 8.1 API-only starter template with JWT authentication, 
 - **Background Jobs**: Solid Queue for database-backed background jobs with Mission Control UI
 - **Versioning**: Paper Trail for model versioning and audit trails
 - **Code Quality**: RuboCop, Brakeman, and bundler-audit for security and code quality
+- **Performance**: `oj` for fast JSON serialization, `bullet` for N+1 query detection (raises in test, logs to console + Rails log in development)
+- **Observability**: `lograge` for structured JSON request logs in production
 - **Active Storage**: File upload support with avatar attachments
 
 ## Prerequisites
 
-- Ruby 3.4+ (managed via `mise` recommended)
+- Ruby 4.0+ (managed via `mise` recommended)
 - PostgreSQL 14+
 - `mise` for Ruby version management (recommended)
 
@@ -26,8 +28,8 @@ A production-ready Rails 8.1 API-only starter template with JWT authentication, 
 
 ```bash
 # Using mise (recommended)
-mise install ruby@3.4.7
-mise use ruby@3.4.7
+mise install ruby@4.0.4
+mise use ruby@4.0.4
 gem install rails
 
 # Or using your preferred Ruby version manager
@@ -55,6 +57,8 @@ git commit -m "Initial commit from Rails API Starter"
 ```bash
 bundle install
 ```
+
+The template commits `.bundle/config` with `BUNDLE_PATH=vendor/bundle` and `BUNDLE_CLEAN=true`, so gems install into `vendor/bundle/` (not the user-level gem cache) and stale versions are removed automatically on `bundle install` / `bundle update`.
 
 ### 4. Configure your application
 
@@ -147,15 +151,14 @@ This will update `swagger/v1/swagger.yaml` with all documented endpoints.
 ### Run the test suite
 
 ```bash
-# Run all tests
+# Run all tests (coverage report generated automatically)
 bundle exec rspec
 
 # Run specific test files
 bundle exec rspec spec/models/user_spec.rb
-
-# Run with coverage report (generated automatically)
-bundle exec rspec
 ```
+
+To run the full check suite (tests + rubocop + brakeman + bundle audit) in one command, see `rake ci` under [Code quality checks](#code-quality-checks).
 
 ### Code coverage
 
@@ -173,14 +176,14 @@ open coverage/index.html
 ### Code quality checks
 
 ```bash
-# Run Rubocop (code style)
-bundle exec rubocop
+# Run the full CI suite (rspec + rubocop + brakeman + bundle audit)
+bundle exec rake ci
 
-# Run Brakeman (security)
-bundle exec brakeman
-
-# Run bundle audit (vulnerability check)
-bundle exec bundle audit check
+# Or run individual checks:
+bundle exec rake ci:rspec
+bundle exec rake ci:rubocop
+bundle exec rake ci:brakeman
+bundle exec rake ci:audit
 ```
 
 ## Development Tools

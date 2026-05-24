@@ -5,6 +5,11 @@ RSpec.describe AuthenticationService, type: :service do
   let(:mock_request) { double('request', cookies: {}, headers: {}) }
   let(:mobile_request) { double('request', cookies: {}, headers: { 'X-Client-Type' => 'mobile' }) }
 
+  # ENV[] is stubbed with .with('COOKIE_DOMAIN') in several contexts below.
+  # Default unstubbed lookups to nil (deterministic, host-env independent) so
+  # unrelated reads — e.g. Bullet's ENV["BULLET_DEBUG"] — still succeed.
+  before { allow(ENV).to receive(:[]).and_return(nil) }
+
   describe '.authenticate_user' do
     it 'generates tokens and returns authentication data' do
       result = described_class.authenticate_user(user)

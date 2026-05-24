@@ -103,4 +103,15 @@ Rails.application.configure do
     Rails.logger.info "🌐 API Host: http://#{default_host}"
     Rails.logger.info "📁 Active Storage URLs will use: http://#{default_host}/rails/active_storage/..."
   end
+
+  config.after_initialize do
+    Bullet.enable = true
+    Bullet.alert = false
+    Bullet.bullet_logger = true
+    Bullet.console = true
+    Bullet.rails_logger = true
+    # Unused-eager-loading detection produces frequent false positives
+    # on Active Storage attachments. N+1 detection remains on.
+    Bullet.unused_eager_loading_enable = false
+  end
 end
